@@ -1,7 +1,10 @@
 package com.dorianquell.codingtask.processor;
 
+import java.time.LocalDate;
+import java.util.Date;
 import java.util.UUID;
 
+import org.apache.tomcat.jni.Time;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Patient;
@@ -34,6 +37,8 @@ public interface FHIRPatientProcessor {
         } else {
             patient.setGender(AdministrativeGender.UNKNOWN);
         }
+        
+        patient.getMeta().setLastUpdated(new Date());
         
         return patient;
     }

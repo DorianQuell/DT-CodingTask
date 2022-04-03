@@ -8,9 +8,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.hl7.fhir.r4.model.Patient;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Repository;
 
 import com.dorianquell.codingtask.processor.FHIRPatientProcessor;
@@ -50,6 +54,18 @@ public class DummyPatientDataAccessService {
         }
     }
 
+    public List<Patient> findAllPatientsByGender(String gender) {
+        gender = gender.toUpperCase();
+        List<Patient> patients = new ArrayList<Patient>();
+
+        for (Patient patient : DB) {
+            if (gender.equals(patient.getGender().toString()))
+                patients.add(patient);
+        }
+
+        return patients;
+    }
+
     private int calculateAge(Date birthdate) {
         if (birthdate != null) {
             LocalDate bd = Instant.ofEpochMilli(birthdate.getTime()).atZone(ZoneId.systemDefault()).toLocalDate();
@@ -66,18 +82,6 @@ public class DummyPatientDataAccessService {
         return null;
     }
 
-    public List<Patient> findAllPatientsByGender(String gender) {
-        gender = gender.toUpperCase();
-        List<Patient> patients = new ArrayList<Patient>();
-
-        for (Patient patient : DB) {
-            if (gender.equals(patient.getGender().toString()))
-                patients.add(patient);
-        }
-
-        return patients;
-    }
-
     private List<Patient> sortPatientsByLastname(List<Patient> patients) {
         Collections.sort(patients, new Comparator<Patient>() {
             @Override
@@ -87,6 +91,40 @@ public class DummyPatientDataAccessService {
         });
 
         return patients;
+    }
+
+    private void deletePatientRecordsOlderThan(Date deletionDate) {
+        Iterator<Patient> iterator = DB.iterator();
+
+        while (iterator.hasNext()) {
+            Patient patient = iterator.next();
+            if (patient.getMeta().getLastUpdated().before(deletionDate))
+                iterator.remove();
+        }
+    }
+
+    @EventListener(ApplicationReadyEvent.class)
+    private void dbCleanUp() {
+
+        Thread dailyCleanUp = new Thread() {
+            public void run() {
+                LocalDate today;
+                while (true) {
+
+                    today = LocalDate.now().minusYears(1);
+                    deletePatientRecordsOlderThan(Date.from(today.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+                    
+                    try {
+                        sleep(TimeUnit.DAYS.toMillis(1));
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            }
+        };
+
+        dailyCleanUp.start();
     }
 
 }
