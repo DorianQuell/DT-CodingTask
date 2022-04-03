@@ -1,5 +1,7 @@
 package com.dorianquell.codingtask.dao;
 
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.HashMap;
 
 import org.springframework.stereotype.Repository;
@@ -12,6 +14,7 @@ public class DummyPatientDataAccessService {
     private static HashMap<Integer, Patient> DB = new HashMap<Integer, Patient>();
 
     public Boolean addPatient(Patient patient) {
+        if(calculateAge(patient.getBirthdate()) >= 18)
         DB.put(patient.getId(), patient);
         return true;
     }
@@ -32,6 +35,13 @@ public class DummyPatientDataAccessService {
 
     public void printDB() {
         System.out.println(DB);
+    }
+    
+    private int calculateAge(LocalDate birthdate) {
+        if(birthdate != null) {
+            return Period.between(birthdate, LocalDate.now()).getYears();
+        }
+        return 0;
     }
 
 }

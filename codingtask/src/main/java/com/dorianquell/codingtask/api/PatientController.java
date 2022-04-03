@@ -28,7 +28,7 @@ public class PatientController {
         return new ResponseEntity<>("Patient could not be stored!", HttpStatus.BAD_REQUEST);
     }
 
-    @GetMapping("getPatient")
+    @GetMapping
     public ResponseEntity<String> getPatient(@RequestBody int id) {
         Patient pat = pda.getPatient(id);
         if (pat != null)

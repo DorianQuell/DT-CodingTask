@@ -1,5 +1,6 @@
 package com.dorianquell.codingtask.model;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.UUID;
 
@@ -27,7 +28,7 @@ public class Patient {
 
     @Getter
     @JsonProperty("birthdate")
-    private Date birthdate;
+    private LocalDate birthdate;
 
     @Override
     public String toString() {
