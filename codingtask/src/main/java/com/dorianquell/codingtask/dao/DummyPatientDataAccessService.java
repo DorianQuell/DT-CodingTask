@@ -23,12 +23,12 @@ public class DummyPatientDataAccessService {
 
     public Boolean addPatient(Patient patient) {
         if (calculateAge(patient.getBirthDate()) >= 18) {
-            if(DB.add(patient)) {
+            if (DB.add(patient)) {
                 DB = sortPatientsByLastname(DB);
                 return true;
             }
         }
-        
+
         return false;
     }
 
@@ -65,16 +65,28 @@ public class DummyPatientDataAccessService {
         }
         return null;
     }
-    
-    private List<Patient> sortPatientsByLastname(List<Patient> patients){
+
+    public List<Patient> findAllPatientsByGender(String gender) {
+        gender = gender.toUpperCase();
+        List<Patient> patients = new ArrayList<Patient>();
+
+        for (Patient patient : DB) {
+            if (gender.equals(patient.getGender().toString()))
+                patients.add(patient);
+        }
+
+        return patients;
+    }
+
+    private List<Patient> sortPatientsByLastname(List<Patient> patients) {
         Collections.sort(patients, new Comparator<Patient>() {
             @Override
             public int compare(Patient p1, Patient p2) {
                 return p1.getName().get(0).getFamily().compareTo(p2.getName().get(0).getFamily());
             }
         });
-        
+
         return patients;
     }
-    
+
 }

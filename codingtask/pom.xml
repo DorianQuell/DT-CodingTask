@@ -48,6 +48,11 @@
 			<artifactId>hapi-fhir-structures-r4</artifactId>
 			<version>5.7.1</version>
 		</dependency>
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20220320</version>
+		</dependency>
 	</dependencies>
 
 	<build>

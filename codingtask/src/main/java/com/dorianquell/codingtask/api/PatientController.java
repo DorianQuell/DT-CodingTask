@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hl7.fhir.r4.model.Patient;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.dorianquell.codingtask.dao.DummyPatientDataAccessService;
@@ -40,10 +43,13 @@ public class PatientController {
     }
 
     @GetMapping("search")
-    public List searchFor(@RequestBody PatientInput patient) {
-        List patients = new ArrayList();
-        pda.printDB();
-        return patients;
+    public ResponseEntity<String> searchFor(@RequestParam String gender) {
+        List<Patient> patients = pda.findAllPatientsByGender(gender);
+        JSONArray response = new JSONArray();
+        for (Patient patient : patients) {
+            response.put(new JSONObject(FHIRPatientProcessor.parseFHIR(patient)));
+        }
+        return new ResponseEntity<>(response.toString(), HttpStatus.OK);
     }
 
     @DeleteMapping
