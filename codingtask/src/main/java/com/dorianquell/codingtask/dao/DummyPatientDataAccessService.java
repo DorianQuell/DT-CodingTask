@@ -1,34 +1,36 @@
 package com.dorianquell.codingtask.dao;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Period;
-import java.util.HashMap;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
+import org.hl7.fhir.r4.model.Patient;
 import org.springframework.stereotype.Repository;
-
-import com.dorianquell.codingtask.model.Patient;
 
 @Repository("DummyPatientDAO")
 public class DummyPatientDataAccessService {
 
-    private static HashMap<Integer, Patient> DB = new HashMap<Integer, Patient>();
+    // private static HashMap<Integer, PatientInput> DB = new HashMap<Integer, PatientInput>();
+    private static List<Patient> DB = new ArrayList<Patient>();
 
     public Boolean addPatient(Patient patient) {
-        if(calculateAge(patient.getBirthdate()) >= 18)
-        DB.put(patient.getId(), patient);
-        return true;
+        if (calculateAge(patient.getBirthDate()) >= 18)
+            return DB.add(patient);
+        return false;
     }
 
-    public Patient getPatient(int id) {
-        if (DB.containsKey(id))
-            return DB.get(id);
-        return null;
+    public Patient getPatient(String id) {
+        return findInDB(id);
     }
 
-    public Boolean deletePatient(int id) {
-        if (DB.containsKey(id)) {
-            DB.remove(id);
-            return true;
+    public Boolean deletePatient(String id) {
+        Patient toDelete = findInDB(id);
+        if (toDelete != null) {
+            return DB.remove(toDelete);
         }
         return false;
     }
@@ -36,12 +38,20 @@ public class DummyPatientDataAccessService {
     public void printDB() {
         System.out.println(DB);
     }
-    
-    private int calculateAge(LocalDate birthdate) {
-        if(birthdate != null) {
-            return Period.between(birthdate, LocalDate.now()).getYears();
+
+    private int calculateAge(Date birthdate) {
+        if (birthdate != null) {
+            LocalDate bd = Instant.ofEpochMilli(birthdate.getTime()).atZone(ZoneId.systemDefault()).toLocalDate();
+            return Period.between(bd, LocalDate.now()).getYears();
         }
         return 0;
     }
 
+    private Patient findInDB(String id) {
+        for (Patient patient : DB) {
+            if (patient.getId().equals(id))
+                return patient;
+        }
+        return null;
+    }
 }

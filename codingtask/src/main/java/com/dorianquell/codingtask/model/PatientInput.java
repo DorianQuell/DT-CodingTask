@@ -8,11 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Getter;
 
-public class Patient {
-
-    @Getter
-    @JsonProperty("id")
-    private int id;
+public class PatientInput {
 
     @Getter
     @JsonProperty("firstname")
@@ -24,7 +20,7 @@ public class Patient {
 
     @Getter
     @JsonProperty("gender")
-    private char gender;
+    private String gender;
 
     @Getter
     @JsonProperty("birthdate")
@@ -32,7 +28,7 @@ public class Patient {
 
     @Override
     public String toString() {
-        return "Patient [id=" + id + ", firstname=" + firstname + ", lastname=" + lastname + ", gender=" + gender
+        return "Patient [firstname=" + firstname + ", lastname=" + lastname + ", gender=" + gender
                 + ", birthdate=" + birthdate + "]";
     }
     
