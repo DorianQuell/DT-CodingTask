@@ -40,7 +40,7 @@ public class PatientController {
     }
 
     @GetMapping("search")
-    public List searchFor(@RequestBody Patient patient) {
+    public List searchFor(@RequestBody PatientInput patient) {
         List patients = new ArrayList();
         pda.printDB();
         return patients;

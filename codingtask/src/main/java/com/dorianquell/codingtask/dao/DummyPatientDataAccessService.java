@@ -5,11 +5,15 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
 import org.hl7.fhir.r4.model.Patient;
 import org.springframework.stereotype.Repository;
+
+import com.dorianquell.codingtask.processor.FHIRPatientProcessor;
 
 @Repository("DummyPatientDAO")
 public class DummyPatientDataAccessService {
@@ -18,8 +22,13 @@ public class DummyPatientDataAccessService {
     private static List<Patient> DB = new ArrayList<Patient>();
 
     public Boolean addPatient(Patient patient) {
-        if (calculateAge(patient.getBirthDate()) >= 18)
-            return DB.add(patient);
+        if (calculateAge(patient.getBirthDate()) >= 18) {
+            if(DB.add(patient)) {
+                DB = sortPatientsByLastname(DB);
+                return true;
+            }
+        }
+        
         return false;
     }
 
@@ -36,7 +45,9 @@ public class DummyPatientDataAccessService {
     }
 
     public void printDB() {
-        System.out.println(DB);
+        for (Patient patient : DB) {
+            System.out.println(FHIRPatientProcessor.parseFHIR(patient));
+        }
     }
 
     private int calculateAge(Date birthdate) {
@@ -54,4 +65,16 @@ public class DummyPatientDataAccessService {
         }
         return null;
     }
+    
+    private List<Patient> sortPatientsByLastname(List<Patient> patients){
+        Collections.sort(patients, new Comparator<Patient>() {
+            @Override
+            public int compare(Patient p1, Patient p2) {
+                return p1.getName().get(0).getFamily().compareTo(p2.getName().get(0).getFamily());
+            }
+        });
+        
+        return patients;
+    }
+    
 }
