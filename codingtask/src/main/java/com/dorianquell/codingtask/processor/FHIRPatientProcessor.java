@@ -1,10 +1,8 @@
 package com.dorianquell.codingtask.processor;
 
-import java.time.LocalDate;
 import java.util.Date;
 import java.util.UUID;
 
-import org.apache.tomcat.jni.Time;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Patient;
@@ -16,35 +14,50 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 
 public interface FHIRPatientProcessor {
-    
-    FhirContext ctx = new FhirContext().forR4();
+
+    FhirContext ctx = FhirContext.forR4();
     IParser fhirParser = ctx.newJsonParser();
-    
-    public static Patient createFHIRPatient(PatientInput pat) {
-        Patient patient = new Patient();
-        
-        patient.setId(UUID.randomUUID().toString());
-        patient.addName(new HumanName().setFamily(pat.getLastname()).addGiven(pat.getFirstname()));
-        patient.setBirthDateElement(new DateType(pat.getBirthdate().toString()));
-        
-        String gender = pat.getGender().toLowerCase();
-        if("male".equals(gender)) {
-            patient.setGender(AdministrativeGender.MALE);
-        } else if ("female".equals(gender)) {
-            patient.setGender(AdministrativeGender.FEMALE);
-        } else if ("other".equals(gender)) {
-            patient.setGender(AdministrativeGender.OTHER);
-        } else {
-            patient.setGender(AdministrativeGender.UNKNOWN);
+
+    /**
+     * @param patient
+     *            object which should transformed into a FHIR resource
+     * @return Patient FHIR resource
+     */
+    public static Patient createFHIRPatient(PatientInput patient) {
+        Patient pat = new Patient();
+
+        pat.setId(UUID.randomUUID().toString());
+        pat.addName(new HumanName().setFamily(patient.getLastname()).addGiven(patient.getFirstname()));
+        pat.setBirthDateElement(new DateType(patient.getBirthdate().toString()));
+
+        String gender = patient.getGender().toLowerCase();
+        switch (gender) {
+            case "male":
+                pat.setGender(AdministrativeGender.MALE);
+                break;
+            case "female":
+                pat.setGender(AdministrativeGender.FEMALE);
+                break;
+            case "other":
+                pat.setGender(AdministrativeGender.OTHER);
+                break;
+            default:
+                pat.setGender(AdministrativeGender.UNKNOWN);
+                break;
         }
-        
-        patient.getMeta().setLastUpdated(new Date());
-        
-        return patient;
+
+        pat.getMeta().setLastUpdated(new Date());
+
+        return pat;
     }
-    
+
+    /**
+     * @param patient
+     *            resource to turn into a string
+     * @return String containing the FHIR patient resource as a json
+     */
     public static String parseFHIR(Patient patient) {
         return ctx.newJsonParser().encodeResourceToString(patient);
     }
-    
+
 }
