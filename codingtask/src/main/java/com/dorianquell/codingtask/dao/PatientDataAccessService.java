@@ -15,10 +15,12 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PreDestroy;
+import javax.swing.text.TabExpander;
 
 import org.hl7.fhir.r4.model.Patient;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Repository;
@@ -33,6 +35,12 @@ public class PatientDataAccessService {
     @Getter
     private Connection dbConnection;
 
+    @Value("${tablename}")
+    private String tablename;
+
+    @Value("${viewname}")
+    private String viewname;
+
     /**
      * Given a FHIR patient resource, the patient will be inserted into the database
      * 
@@ -42,8 +50,8 @@ public class PatientDataAccessService {
      */
     public Boolean addPatient(Patient patient, Connection connection) {
         if (calculateAge(patient.getBirthDate()) >= 18) {
-            String insertSQL =
-                    "INSERT INTO patients (id, firstname, lastname, gender, birthdate, date_created, fhir) VALUES(?,?,?,?,?,?,?)";
+            String insertSQL = "INSERT INTO " + tablename
+                    + " (id, firstname, lastname, gender, birthdate, date_created, fhir) VALUES(?,?,?,?,?,?,?)";
             try {
                 PreparedStatement pstmt = connection.prepareStatement(insertSQL);
                 pstmt.setString(1, patient.getId());
@@ -73,7 +81,7 @@ public class PatientDataAccessService {
      * @return String containing the FHIR resource in a json format
      */
     public String getPatient(String id, Connection connection) {
-        String searchSQL = "SELECT fhir FROM patientsView WHERE id = ?";
+        String searchSQL = "SELECT fhir FROM " + viewname + " WHERE id = ?";
         try {
             PreparedStatement pstmt = connection.prepareStatement(searchSQL);
             pstmt.setString(1, id);
@@ -97,7 +105,7 @@ public class PatientDataAccessService {
      * @return boolean showing if the deletion was successful
      */
     public Boolean deletePatient(String id, Connection connection) {
-        String deleteSQL = "DELETE FROM patients WHERE id = ?";
+        String deleteSQL = "DELETE FROM " + tablename + " WHERE id = ?";
         try {
             PreparedStatement pstmt = connection.prepareStatement(deleteSQL);
             pstmt.setString(1, id);
@@ -117,7 +125,7 @@ public class PatientDataAccessService {
      *            to the database
      */
     public void printDB(Connection connection) {
-        String printSQL = "SELECT * FROM patientsView";
+        String printSQL = "SELECT * FROM " + viewname;
         try {
             Statement stmt = connection.createStatement();
             ResultSet res = stmt.executeQuery(printSQL);
@@ -140,7 +148,7 @@ public class PatientDataAccessService {
      */
     public JSONArray findAllPatientsByGender(String gender, Connection connection) {
         gender = gender.toLowerCase();
-        String searchGenderSQL = "SELECT * FROM patientsView WHERE gender = ?";
+        String searchGenderSQL = "SELECT * FROM " + viewname + " WHERE gender = ?";
         try {
             PreparedStatement pstmt = connection.prepareStatement(searchGenderSQL);
             pstmt.setString(1, gender);
@@ -179,8 +187,8 @@ public class PatientDataAccessService {
      * @param connection
      *            to the database
      */
-    private void deletePatientRecordsOlderThan(Date deletionDate, Connection connection) {
-        String deleteSQL = "DELETE FROM patients WHERE date_created < ?";
+    public void deletePatientRecordsOlderThan(Date deletionDate, Connection connection) {
+        String deleteSQL = "DELETE FROM " + tablename + " WHERE date_created < ?";
         try {
             PreparedStatement pstmt = connection.prepareStatement(deleteSQL);
             pstmt.setDate(1, new java.sql.Date(deletionDate.getTime()));
@@ -195,7 +203,7 @@ public class PatientDataAccessService {
      * Will be run on Start up, used for all initialization calls
      */
     @EventListener(ApplicationReadyEvent.class)
-    private void onStartUp() {
+    public void onStartUp() {
 
         // Create the DB, tables etc. if they don't exist yet
         dbConnection = initDB();
@@ -230,7 +238,7 @@ public class PatientDataAccessService {
             System.out.println("Database connection opened!");
             // Check if table exists
             DatabaseMetaData dmd = connection.getMetaData();
-            ResultSet tables = dmd.getTables(null, null, "patients", null);
+            ResultSet tables = dmd.getTables(null, null, tablename, null);
 
             // If it doesn't exist create the table and the view
             if (!tables.next()) {
@@ -248,9 +256,9 @@ public class PatientDataAccessService {
      * Creates the Patients table
      */
     private void createPatientsTable(Connection connection) throws SQLException {
-        String createTableSQL = "CREATE TABLE patients (" + "    id varchar(255), " + "    firstname varchar(255), "
-                + "    lastname varchar(255), " + "    gender varchar(10), " + "    birthdate date, "
-                + "    date_created date, " + "fhir text, " + "PRIMARY KEY (id)" + ");";
+        String createTableSQL = "CREATE TABLE " + tablename + " (" + "    id varchar(255), "
+                + "    firstname varchar(255), " + "    lastname varchar(255), " + "    gender varchar(10), "
+                + "    birthdate date, " + "    date_created date, " + "fhir text, " + "PRIMARY KEY (id)" + ");";
         connection.createStatement().execute(createTableSQL);
     }
 
@@ -258,7 +266,7 @@ public class PatientDataAccessService {
      * Creates the View of the Patients table to show data ordered by last name
      */
     private void createPatientsView(Connection connection) throws SQLException {
-        String createView = "CREATE VIEW patientsView AS SELECT * FROM patients ORDER BY lastname;";
+        String createView = "CREATE VIEW " + viewname + " AS SELECT * FROM " + tablename + " ORDER BY lastname;";
         connection.createStatement().execute(createView);
     }
 

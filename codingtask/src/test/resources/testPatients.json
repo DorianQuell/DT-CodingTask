@@ -1,0 +1,14 @@
+[
+	{
+		"firstname": "Homer",
+		"lastname": "Simpson",
+		"birthdate": "1951-05-15",
+		"gender": "male"
+	},
+	{
+		"firstname": "Bart",
+		"lastname": "Simpson",
+		"birthdate": "2020-02-23",
+		"gender": "male"
+	}
+]

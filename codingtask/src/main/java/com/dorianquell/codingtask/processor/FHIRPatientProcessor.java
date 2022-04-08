@@ -28,23 +28,28 @@ public interface FHIRPatientProcessor {
 
         pat.setId(UUID.randomUUID().toString());
         pat.addName(new HumanName().setFamily(patient.getLastname()).addGiven(patient.getFirstname()));
-        pat.setBirthDateElement(new DateType(patient.getBirthdate().toString()));
 
-        String gender = patient.getGender().toLowerCase();
-        switch (gender) {
-            case "male":
-                pat.setGender(AdministrativeGender.MALE);
-                break;
-            case "female":
-                pat.setGender(AdministrativeGender.FEMALE);
-                break;
-            case "other":
-                pat.setGender(AdministrativeGender.OTHER);
-                break;
-            default:
-                pat.setGender(AdministrativeGender.UNKNOWN);
-                break;
-        }
+        if (patient.getBirthdate() != null)
+            pat.setBirthDateElement(new DateType(patient.getBirthdate().toString()));
+
+        String gender = patient.getGender();
+        if (gender != null)
+            switch (gender.toLowerCase()) {
+                case "male":
+                    pat.setGender(AdministrativeGender.MALE);
+                    break;
+                case "female":
+                    pat.setGender(AdministrativeGender.FEMALE);
+                    break;
+                case "other":
+                    pat.setGender(AdministrativeGender.OTHER);
+                    break;
+                default:
+                    pat.setGender(AdministrativeGender.UNKNOWN);
+                    break;
+            }
+        else
+            pat.setGender(AdministrativeGender.UNKNOWN);
 
         pat.getMeta().setLastUpdated(new Date());
 
