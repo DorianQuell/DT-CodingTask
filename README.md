@@ -38,3 +38,7 @@ Example REST call:
 
 #### Clean Up
 Once a day the program will remove all patient resources from the database which were created and not updated for the last year.
+
+#### Building and running the project
+The project uses Maven and can be built by using ``` mvn clean install ```.  
+The jar (in the target folder) can be started by using ``` java -jar codingtask-0.0.1-SNAPSHOT.jar ```
