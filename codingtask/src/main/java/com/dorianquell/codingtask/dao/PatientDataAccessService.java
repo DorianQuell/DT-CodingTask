@@ -18,7 +18,6 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PreDestroy;
-import javax.swing.text.TabExpander;
 
 import org.hl7.fhir.r4.model.Patient;
 import org.json.JSONArray;
@@ -69,7 +68,6 @@ public class PatientDataAccessService {
                 pstmt.executeUpdate();
                 return true;
             } catch (SQLException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }
@@ -94,7 +92,6 @@ public class PatientDataAccessService {
             if (res.next())
                 return res.getString("fhir");
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         return null;
@@ -117,7 +114,6 @@ public class PatientDataAccessService {
             pstmt.executeUpdate();
             return true;
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         return false;
@@ -138,7 +134,6 @@ public class PatientDataAccessService {
                 System.out.println(res.getString("fhir"));
             }
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
@@ -168,7 +163,6 @@ public class PatientDataAccessService {
             return (addPatient(patient, connection));
 
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 
@@ -213,7 +207,6 @@ public class PatientDataAccessService {
             return resArr;
 
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 
@@ -266,7 +259,6 @@ public class PatientDataAccessService {
             pstmt.setDate(1, new java.sql.Date(deletionDate.getTime()));
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
@@ -293,7 +285,6 @@ public class PatientDataAccessService {
             dbConnection.close();
             System.out.println("Connection closed!");
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
