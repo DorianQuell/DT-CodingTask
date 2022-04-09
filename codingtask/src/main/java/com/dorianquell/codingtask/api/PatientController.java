@@ -1,5 +1,7 @@
 package com.dorianquell.codingtask.api;
 
+import java.util.Map;
+
 import org.hl7.fhir.r4.model.Patient;
 import org.json.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,9 +42,9 @@ public class PatientController {
     }
 
     @GetMapping("search")
-    public ResponseEntity<String> searchFor(@RequestParam String gender) {
-        JSONArray patients = pda.findAllPatientsByGender(gender, pda.getDbConnection());
-        return new ResponseEntity<>(patients.toString(), HttpStatus.OK);
+    public ResponseEntity<String> search(@RequestParam Map<String,String> allRequestParams){
+        JSONArray patients = pda.search(allRequestParams, pda.getDbConnection());
+        return new ResponseEntity<>(patients.toString(4), HttpStatus.OK); 
     }
 
     @DeleteMapping

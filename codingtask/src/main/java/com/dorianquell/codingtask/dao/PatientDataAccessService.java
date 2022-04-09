@@ -5,13 +5,16 @@ import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PreDestroy;
@@ -46,6 +49,8 @@ public class PatientDataAccessService {
      * 
      * @param patient
      *            The FHIR patient resource to be added
+     * @param conncection
+     *            to the database
      * @return Boolean which indicates if the patient could be added or not
      */
     public Boolean addPatient(Patient patient, Connection connection) {
@@ -138,6 +143,17 @@ public class PatientDataAccessService {
         }
     }
 
+    /**
+     * Given a FHIR patient resource, the patient will be inserted into the database AND all old version of that patient will be
+     * deleted
+     * 
+     * @param patient
+     *            The FHIR patient resource to be added
+     * @param conncection
+     *            to the database
+     * @return Boolean which indicates if the patient could be added or not
+     */
+
     public Boolean updatePatient(Patient patient, Connection connection) {
         String searchSQL =
                 "DELETE FROM " + tablename + " WHERE firstname = ? AND lastname = ? AND gender = ? and birthdate = ?";
@@ -160,31 +176,66 @@ public class PatientDataAccessService {
     }
 
     /**
-     * Given a gender (male, female, other, unknown, ...) the function will return all patients of the given gender
      * 
-     * @param gender
+     * @param searchParameters
+     *            map with all search parameters as keys and value as the desired fields. Invalid fields will be ignored. An empty
+     *            map will return the full data set.
      * @param connection
-     *            to the database
-     * @return JSONArray containing all FHIR resources of the found patients as JSONObjects
+     *            to database
+     * @return JSONArray with all fhir resources
      */
-    public JSONArray findAllPatientsByGender(String gender, Connection connection) {
-        gender = gender.toLowerCase();
-        String searchGenderSQL = "SELECT * FROM " + viewname + " WHERE gender = ?";
+    public JSONArray search(Map<String, String> searchParameters, Connection connection) {
+        String templateQuery = "SELECT fhir FROM " + viewname;
+        String searchSQL = templateQuery;
+
         try {
-            PreparedStatement pstmt = connection.prepareStatement(searchGenderSQL);
-            pstmt.setString(1, gender);
-            ResultSet res = pstmt.executeQuery();
+            // If there is atleast one search parameter generate the sql query
+            if (searchParameters.size() > 0) {
+                searchSQL += " WHERE ";
+                // Get a list of all column names
+                ArrayList<String> columnNames = getAllColumnNames(connection);
+
+                // Add all search parameters which exist as column names
+                for (Map.Entry<String, String> entry : searchParameters.entrySet()) {
+                    if (columnNames.contains(entry.getKey()))
+                        searchSQL += entry.getKey() + " = '" + entry.getValue() + "' AND ";
+                }
+                // Clean up the query and remove the last AND
+                searchSQL = (searchSQL + ";").replace(" AND ;", "").replace(" WHERE ;", "");
+                System.out.println(searchSQL);
+            }
+
+            ResultSet res = connection.createStatement().executeQuery(searchSQL);
             JSONArray resArr = new JSONArray();
             while (res.next()) {
                 resArr.put(new JSONObject(res.getString("fhir")));
             }
             return resArr;
+
         } catch (SQLException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
 
         return null;
+    }
+
+    /**
+     * 
+     * @param connection
+     *            to database
+     * @return String List of all column names
+     * @throws SQLException
+     */
+    private ArrayList<String> getAllColumnNames(Connection connection) throws SQLException {
+        ArrayList<String> columnNames = new ArrayList<String>();
+        String sql = "SELECT * FROM " + tablename + " WHERE 1 = 0";
+        ResultSetMetaData rsmd = connection.createStatement().executeQuery(sql).getMetaData();
+        int columnCount = rsmd.getColumnCount();
+        for (int i = 1; i <= columnCount; i++) {
+            columnNames.add(rsmd.getColumnName(i));
+        }
+        return columnNames;
     }
 
     /**

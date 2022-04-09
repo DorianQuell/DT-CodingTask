@@ -7,6 +7,7 @@ import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
+import org.json.JSONObject;
 
 import com.dorianquell.codingtask.model.PatientInput;
 
@@ -62,7 +63,7 @@ public interface FHIRPatientProcessor {
      * @return String containing the FHIR patient resource as a json
      */
     public static String parseFHIR(Patient patient) {
-        return ctx.newJsonParser().encodeResourceToString(patient);
+        return new JSONObject(ctx.newJsonParser().encodeResourceToString(patient)).toString(4);
     }
 
 }

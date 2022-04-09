@@ -16,6 +16,8 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.hl7.fhir.r4.model.Patient;
 import org.json.JSONArray;
@@ -142,11 +144,14 @@ public class PatientDataAccessServiceTest {
         pda.addPatient(patient, pda.getDbConnection());
 
         // Check if get function works
+        Map<String, String> searchParameters = new HashMap<String, String>();
+        searchParameters.put("id", patient.getId().toString());
         assertEquals(FHIRPatientProcessor.parseFHIR(patient),
-            pda.getPatient(patient.getId().toString(), pda.getDbConnection()));
+            pda.search(searchParameters, pda.getDbConnection()).getJSONObject(0).toString(4));
 
         // Try reading a non-existent patient
-        assertEquals(null, pda.getPatient("123", pda.getDbConnection()));
+        searchParameters.put("id", "123");
+        assertEquals(new JSONArray(), pda.search(searchParameters, pda.getDbConnection()));
     }
 
     @Test
@@ -183,7 +188,7 @@ public class PatientDataAccessServiceTest {
     }
 
     @Test
-    public void testFindAllPatientsByGender() throws JSONException, SQLException {
+    public void testSearch() throws JSONException, SQLException {
         JSONObject json = input.getJSONObject(0);
 
         // Check if table is empty
@@ -201,8 +206,16 @@ public class PatientDataAccessServiceTest {
         pda.addPatient(patient2, pda.getDbConnection());
 
         // Check if function finds 2 male patients and no females
-        assertTrue(2 == pda.findAllPatientsByGender("male", pda.getDbConnection()).length());
-        assertTrue(0 == pda.findAllPatientsByGender("female", pda.getDbConnection()).length());
+        Map<String, String> searchParameters = new HashMap<String, String>();
+        searchParameters.put("gender", "male");
+        assertTrue(2 == pda.search(searchParameters, pda.getDbConnection()).length());
+        searchParameters.put("gender", "female");
+        assertTrue(0 == pda.search(searchParameters, pda.getDbConnection()).length());
+        
+        // Check if function finds 2 males with last name Simpson
+        searchParameters.put("gender", "male");
+        searchParameters.put("lastname", "Simpson");
+        assertTrue(2 == pda.search(searchParameters, pda.getDbConnection()).length());
     }
     
     @Test
