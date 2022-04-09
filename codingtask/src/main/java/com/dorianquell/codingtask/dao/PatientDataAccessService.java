@@ -138,6 +138,27 @@ public class PatientDataAccessService {
         }
     }
 
+    public Boolean updatePatient(Patient patient, Connection connection) {
+        String searchSQL =
+                "DELETE FROM " + tablename + " WHERE firstname = ? AND lastname = ? AND gender = ? and birthdate = ?";
+        try {
+            PreparedStatement pstmt = connection.prepareStatement(searchSQL);
+            pstmt.setString(1, patient.getName().get(0).getGivenAsSingleString());
+            pstmt.setString(2, patient.getName().get(0).getFamily());
+            pstmt.setString(3, patient.getGender().toString().toLowerCase());
+            pstmt.setDate(4, new java.sql.Date(patient.getBirthDate().getTime()));
+            pstmt.executeUpdate();
+
+            return (addPatient(patient, connection));
+
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
     /**
      * Given a gender (male, female, other, unknown, ...) the function will return all patients of the given gender
      * 

@@ -100,6 +100,30 @@ public class PatientDataAccessServiceTest {
         
         assertFalse(pda.addPatient(patient, pda.getDbConnection()));
     }
+    
+    @Test
+    public void testUpdatePatient() throws JSONException, SQLException {
+        JSONObject json = input.getJSONObject(0);
+
+        // Check if table is empty
+        String sql = "SELECT COUNT(*) AS count FROM " + tablename;
+        ResultSet result = pda.getDbConnection().createStatement().executeQuery(sql);
+        assertTrue(0 == result.getInt("count"));
+
+        // Add patients
+        PatientInput pat = new PatientInput(json.getString("firstname"), json.getString("lastname"),
+            json.getString("gender"), LocalDate.parse(json.getString("birthdate")));
+        Patient patient = FHIRPatientProcessor.createFHIRPatient(pat);
+        Patient patient2 = FHIRPatientProcessor.createFHIRPatient(pat);
+
+        pda.updatePatient(patient, pda.getDbConnection());
+        pda.updatePatient(patient2, pda.getDbConnection());
+
+        // Table should now only have one patient
+        sql = "SELECT COUNT(*) AS count FROM " + tablename;
+        result = pda.getDbConnection().createStatement().executeQuery(sql);
+        assertTrue(1 == result.getInt("count"));
+    }
 
     @Test
     public void testGetPatient() throws JSONException, SQLException {
