@@ -7,7 +7,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Period;
@@ -75,29 +74,6 @@ public class PatientDataAccessService {
     }
 
     /**
-     * Returns the FHIR resource for a patient given it's ID
-     * 
-     * @param id
-     *            of the patient to be returned
-     * @param connection
-     *            to the database
-     * @return String containing the FHIR resource in a json format
-     */
-    public String getPatient(String id, Connection connection) {
-        String searchSQL = "SELECT fhir FROM " + viewname + " WHERE id = ?";
-        try {
-            PreparedStatement pstmt = connection.prepareStatement(searchSQL);
-            pstmt.setString(1, id);
-            ResultSet res = pstmt.executeQuery();
-            if (res.next())
-                return res.getString("fhir");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    /**
      * Deletes a patient given its ID
      * 
      * @param id
@@ -117,25 +93,6 @@ public class PatientDataAccessService {
             e.printStackTrace();
         }
         return false;
-    }
-
-    /**
-     * Writes the content of the database to the command line Debugging only - Remove later
-     * 
-     * @param connection
-     *            to the database
-     */
-    public void printDB(Connection connection) {
-        String printSQL = "SELECT * FROM " + viewname;
-        try {
-            Statement stmt = connection.createStatement();
-            ResultSet res = stmt.executeQuery(printSQL);
-            while (res.next()) {
-                System.out.println(res.getString("fhir"));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
     }
 
     /**

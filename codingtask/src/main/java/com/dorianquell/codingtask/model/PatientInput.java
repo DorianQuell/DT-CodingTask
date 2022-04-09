@@ -1,8 +1,6 @@
 package com.dorianquell.codingtask.model;
 
 import java.time.LocalDate;
-import java.util.Date;
-import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

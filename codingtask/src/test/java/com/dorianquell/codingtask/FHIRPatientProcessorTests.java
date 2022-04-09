@@ -7,7 +7,6 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDate;
-import java.util.Date;
 
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Patient;
@@ -22,7 +21,6 @@ import com.dorianquell.codingtask.model.PatientInput;
 import com.dorianquell.codingtask.processor.FHIRPatientProcessor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest
 public class FHIRPatientProcessorTests {

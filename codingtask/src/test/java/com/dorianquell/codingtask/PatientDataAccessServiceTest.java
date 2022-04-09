@@ -257,7 +257,9 @@ public class PatientDataAccessServiceTest {
         assertTrue(1 == result.getInt("count"));
         
         // Check if it's the correct patient
-        assertEquals(FHIRPatientProcessor.parseFHIR(patient2), pda.getPatient(patient2.getId().toString(), pda.getDbConnection()));
+        Map<String, String> searchParameters = new HashMap<String, String>();
+        searchParameters.put("id", patient2.getId().toString());
+        assertEquals(FHIRPatientProcessor.parseFHIR(patient2), pda.search(searchParameters, pda.getDbConnection()).getJSONObject(0).toString(4));
         
     }
 

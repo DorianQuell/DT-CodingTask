@@ -32,14 +32,6 @@ public class PatientController {
         return new ResponseEntity<>("Patient could not be stored!", HttpStatus.BAD_REQUEST);
     }
 
-    @GetMapping
-    public ResponseEntity<String> getPatient(@RequestParam String id) {
-        String patient = pda.getPatient(id, pda.getDbConnection());
-        if (patient != null)
-            return new ResponseEntity<>(patient, HttpStatus.OK);
-        return new ResponseEntity<>("Patient could not be found!", HttpStatus.BAD_REQUEST);
-    }
-
     @GetMapping("search")
     public ResponseEntity<String> search(@RequestParam Map<String,String> allRequestParams){
         JSONArray patients = pda.search(allRequestParams, pda.getDbConnection());
@@ -53,9 +45,4 @@ public class PatientController {
         return new ResponseEntity<>("Could not delete Patient " + id, HttpStatus.BAD_REQUEST);
     }
     
-    @GetMapping("print")
-    public void printAllPatients() {
-        pda.printDB(pda.getDbConnection());
-    }
-
 }
