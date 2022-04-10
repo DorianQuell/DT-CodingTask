@@ -91,7 +91,7 @@ public class PatientDataAccessServiceTest {
         assertEquals(json.getString("firstname"), result.getString("firstname"));
         assertEquals(json.getString("lastname"), result.getString("lastname"));
         assertEquals(json.getString("gender"), result.getString("gender"));
-        assertEquals(json.getString("birthdate"), result.getDate("birthdate").toString());
+        assertEquals(json.getString("birthdate"), result.getString("birthdate"));
         assertEquals(FHIRPatientProcessor.parseFHIR(patient), result.getString("fhir"));
         
         // Try adding an underaged patient

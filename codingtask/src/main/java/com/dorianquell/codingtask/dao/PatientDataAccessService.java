@@ -62,7 +62,7 @@ public class PatientDataAccessService {
                 pstmt.setString(3, patient.getName().get(0).getFamily());
                 pstmt.setString(4, patient.getGender().toString().toLowerCase());
                 pstmt.setString(5, patient.getBirthDateElement().asStringValue());
-                pstmt.setString(6, patient.getMeta().getLastUpdatedElement().asStringValue());
+                pstmt.setDate(6, new java.sql.Date(patient.getMeta().getLastUpdated().getTime()));
                 pstmt.setString(7, FHIRPatientProcessor.parseFHIR(patient));
                 pstmt.executeUpdate();
                 return true;
@@ -114,7 +114,7 @@ public class PatientDataAccessService {
             pstmt.setString(1, patient.getName().get(0).getGivenAsSingleString());
             pstmt.setString(2, patient.getName().get(0).getFamily());
             pstmt.setString(3, patient.getGender().toString().toLowerCase());
-            pstmt.setDate(4, new java.sql.Date(patient.getBirthDate().getTime()));
+            pstmt.setString(4, patient.getBirthDateElement().asStringValue());
             pstmt.executeUpdate();
 
             return (addPatient(patient, connection));
@@ -278,7 +278,7 @@ public class PatientDataAccessService {
     private void createPatientsTable(Connection connection) throws SQLException {
         String createTableSQL = "CREATE TABLE " + tablename + " (" + "    id varchar(255), "
                 + "    firstname varchar(255), " + "    lastname varchar(255), " + "    gender varchar(10), "
-                + "    birthdate text, " + "    date_created text, " + "fhir text, " + "PRIMARY KEY (id)" + ");";
+                + "    birthdate text, " + "    date_created date, " + "fhir text, " + "PRIMARY KEY (id)" + ");";
         connection.createStatement().execute(createTableSQL);
     }
 
