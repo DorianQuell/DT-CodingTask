@@ -23,12 +23,13 @@ If the patient was added successfully, the call will return the patients ID.
 
 #### GET
 **/search** allows the user the create a SQL search query. Using it without any parameters will return all patients.  
-The fields ``` id ```, ``` firstname ```, ``` lastname ```, and ``` gender ``` can be searched.  
+The fields ``` id ```, ``` firstname ```, ``` lastname ```, ``` gender ```, and ``` birthdate ``` can be searched.  
 The search results are returned as a JSON array containing patient FHIR resources.  
 Multiple results will also be returned ordered alphabetically by their last names.  
 Example REST call:  
 ``` curl -X GET 'http://localhost:8080/search?gender=female' ``` will return all female patients.  
 ``` curl -X GET 'http://localhost:8080/search?gender=female&firstname=Anna' ``` will return all female patients called Anna.  
+``` curl -X GET 'http://localhost:8080/search?birthdate=1990-01-01' ``` will return all patients born on the 1st of January 1990.  
 *Note: Invalid search parameters will be ignored and the search query will be built without them!*
 
 #### DELETE
